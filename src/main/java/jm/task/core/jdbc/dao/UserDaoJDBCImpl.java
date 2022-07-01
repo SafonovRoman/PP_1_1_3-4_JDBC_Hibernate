@@ -3,6 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,7 +16,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void createUsersTable() {
-        String sqlQuery = "CREATE TABLE USERS (" +
+        String sqlQuery = "CREATE TABLE IF NOT EXISTS USERS (" +
                 "id BIGINT KEY NOT NULL AUTO_INCREMENT, " +
                 "name VARCHAR(50), " +
                 "lastName VARCHAR(50), " +
@@ -29,7 +30,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        String sqlQuery = "DROP TABLE USERS;";
+        String sqlQuery = "DROP TABLE IF EXISTS USERS;";
         try (Statement stmt = Util.getConnection().createStatement()) {
             stmt.execute(sqlQuery);
         } catch (SQLException e) {
@@ -39,9 +40,12 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        String sqlQuery = String.format("INSERT INTO USERS (name, lastName, age) VALUES ('%s', '%s', '%s');", name, lastName, age);
-        try (Statement stmt = Util.getConnection().createStatement()) {
-            stmt.execute(sqlQuery);
+        String sqlQuery = "INSERT INTO USERS (name, lastName, age) VALUES (?, ?, ?);";
+        try (PreparedStatement preparedStatement = Util.getConnection().prepareStatement(sqlQuery)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setInt(3, age);
+            preparedStatement.execute();
             System.out.printf("User с именем – %s добавлен в базу данных%n", name);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -50,9 +54,10 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        String sqlQuery = String.format("DELETE FROM USERS WHERE id=%s", id);
-        try (Statement stmt = Util.getConnection().createStatement()) {
-            stmt.execute(sqlQuery);
+        String sqlQuery = "DELETE FROM USERS WHERE id=?;";
+        try (PreparedStatement preparedStatement = Util.getConnection().prepareStatement(sqlQuery)) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.execute(sqlQuery);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             System.out.println("Статус ошибки - " + e.getSQLState());
