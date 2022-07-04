@@ -27,6 +27,7 @@ public class HibernateUtil {
                         "mysql" : System.getenv("SQL_DRIVER");
                 int port = System.getenv("MYSQL_DATABASE") == null ?
                         3306 : Integer.parseInt(System.getenv("MYSQL_DATABASE"));
+
                 Configuration configuration = new Configuration();
                 Properties settings = new Properties();
                 settings.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
@@ -34,15 +35,10 @@ public class HibernateUtil {
                 settings.put(Environment.USER, login);
                 settings.put(Environment.PASS, password);
                 settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
-
                 settings.put(Environment.SHOW_SQL, "true");
-
                 settings.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-
-                settings.put(Environment.HBM2DDL_AUTO, "create-drop");
-
+//                settings.put(Environment.HBM2DDL_AUTO, "update");
                 configuration.setProperties(settings);
-
                 configuration.addAnnotatedClass(User.class);
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
